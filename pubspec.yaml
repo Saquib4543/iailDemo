@@ -46,6 +46,7 @@ dependencies:
   html: ^0.15.4
   http_parser: ^4.0.2
   glass: ^1.0.1+1
+  tflite_flutter: ^0.10.1
 
 dev_dependencies:
   flutter_test:

@@ -8,6 +8,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'dart:js' as js;
 
 class CameraImageUpload extends StatefulWidget {
   bool showTopBanner;
@@ -33,23 +34,7 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
   int _currentIndex = 0;
   CarouselController imageCarouselController = CarouselController();
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   SystemChrome.setPreferredOrientations([
-  //     DeviceOrientation.landscapeLeft,
-  //     DeviceOrientation.landscapeRight,
-  //   ]);
-  // }
-  //
-  // @override
-  // void dispose() {
-  //   SystemChrome.setPreferredOrientations([
-  //     DeviceOrientation.portraitUp,
-  //     DeviceOrientation.portraitDown,
-  //   ]);
-  //   super.dispose();
-  // }
+
 
   void incrementCurrentIndex() {
     if (widget.showTopBanner) {
@@ -66,6 +51,10 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
       imageCarouselController.animateToPage(_currentIndex,
           duration: Duration(milliseconds: 300), curve: Curves.fastOutSlowIn);
     }
+  }
+  void startObjectDetection() {
+    print("Calling JS function now...");
+    js.context.callMethod('startObjectDetection');
   }
 
   List<String> imageNameList = [
@@ -160,101 +149,6 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // imgIdx < idx
-          // ? Icon(
-          //     Icons.done_rounded,
-          //     color: Colors.green,
-          //   )
-          // : Icon(
-          //     Icons.warning_amber,
-          //     color: Colors.amber,
-          //   ),
-          ////////////////////////////////////////////////////////////////
-          // TextButton(
-          //   onPressed: () => showDialog<String>(
-          //     context: context,
-          //     builder: (BuildContext context) => AlertDialog(
-          //       title: const Text('AlertDialog Title'),
-          //       content: const Text('AlertDialog description'),
-          //       actions: <Widget>[
-          //         TextButton(
-          //           onPressed: () => Navigator.pop(context, 'Cancel'),
-          //           child: const Text('Cancel'),
-          //         ),
-          //         TextButton(
-          //           onPressed: () => Navigator.pop(context, 'OK'),
-          //           child: const Text('OK'),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          //   child: const Text('Show Dialog'),
-          // ),
-//////////////////////////////////
-//           GestureDetector(
-//             onTap: () => showDialog(
-//               context: context,
-//               builder: (BuildContext context) => AlertDialog(
-//                 title: Container(
-//                   color: red,
-//                   child: Text(
-//                     imageNameList[imgIdx],
-//                     textAlign: TextAlign.center,
-//                     style: TextStyle(color: white),
-//                   ),
-//                 ),
-//                 content: Image.asset(
-//                   thumbnailPathList[imgIdx],
-//                   height: ResHeight(300),
-//                   // fit: BoxFit.fill,
-//                   width: ResWidth(100),
-//                 ),
-//                 actions: <Widget>[
-//                   TextButton(
-//                     onPressed: () => Navigator.pop(context, 'OK'),
-//                     child: Text(
-//                       'OK',
-//                       style: TextStyle(color: red),
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             child: Image.asset(
-//               thumbnailPathList[imgIdx],
-//               width: ResWidth(50),
-//               height: ResHeight(60),
-//             ),
-//           ),
-/////////////////////////////
-          // GestureDetector(
-          // child: Image.asset(
-          //   thumbnailPathList[imgIdx],
-          //   width: ResWidth(50),
-          //   height: ResHeight(30),
-          // ),
-          //   onTap: () {
-          //     // AlertDialog(
-          //     //   title: const Text('Popup example'),
-          //     //   content: new Column(
-          //     //     mainAxisSize: MainAxisSize.min,
-          //     //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     //     children: <Widget>[
-          //     //       Text("Hello"),
-          //     //     ],
-          //     //   ),
-          //     //   actions: <Widget>[
-          //     //     new FlatButton(
-          //     //       onPressed: () {
-          //     //         Navigator.of(context).pop();
-          //     //       },
-          //     //       textColor: Theme.of(context).primaryColor,
-          //     //       child: const Text('Close'),
-          //     //     ),
-          //     //   ],
-          //     // );
-          //   },
-          // ),
 
           SizedBox(
             height: ResHeight(0),
@@ -284,17 +178,6 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
       ResolutionPreset.high,
       enableAudio: true);
 
-  // void cameraInit() async {
-  //   cameras = await availableCameras();
-  //   controller =
-  //       CameraController(cameras[0], ResolutionPreset.high, enableAudio: true);
-  //   controller.initialize().then((_) {
-  //     if (!mounted) {
-  //       return;
-  //     }
-  //     setState(() {});
-  //   });
-  // }
   void cameraInit() async {
     cameras = await availableCameras();
     CameraDescription? backCamera;
@@ -311,6 +194,7 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
           return;
         }
         setState(() {});
+        startObjectDetection();
       });
     } else {
       print("No back camera found");
