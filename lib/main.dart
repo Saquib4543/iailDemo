@@ -1,6 +1,7 @@
 import 'package:damagedetection1/otp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:damagedetection1/helpers/routeobserver.dart';
 
 void main() {
   runApp(MyApp());
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: LoginPage(),
+      navigatorObservers: [routeObserver],
     );
   }
 }

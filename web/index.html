@@ -39,22 +39,21 @@
   <link rel="manifest" href="manifest.json">
   <style>
         body {
-            margin: 0;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f3f4f6;
+              margin: 0;
+              overflow: hidden;
+              font-family: Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              background-color: #f3f4f6;
         }
 
         #videoElement,
         #canvas {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
         }
 
         #canvas {
@@ -72,10 +71,10 @@
   <script src="flutter.js" defer></script>
 </head>
 <body>
+
   <video id="videoElement" width="640" height="480" autoplay muted playsinline></video>
 
   <canvas id="canvas"></canvas>
-
 
   <script>
     window.addEventListener('load', function(ev) {

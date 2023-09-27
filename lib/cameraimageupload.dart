@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:js' as js;
+import 'package:damagedetection1/helpers/routeobserver.dart';
 
 class CameraImageUpload extends StatefulWidget {
   bool showTopBanner;
@@ -30,7 +31,7 @@ class CameraImageUpload extends StatefulWidget {
   State<CameraImageUpload> createState() => _CameraImageUploadState();
 }
 
-class _CameraImageUploadState extends State<CameraImageUpload> {
+class _CameraImageUploadState extends State<CameraImageUpload> with RouteAware {
   int _currentIndex = 0;
   CarouselController imageCarouselController = CarouselController();
 
@@ -55,6 +56,10 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
   void startObjectDetection() {
     print("Calling JS function now...");
     js.context.callMethod('startObjectDetection');
+  }
+  void stopObjectDetection() {
+    print("Requesting JS to stop object detection...");
+    js.context.callMethod('stopObjectDetection');
   }
 
   List<String> imageNameList = [
@@ -188,13 +193,13 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
     }
 
     if (backCamera != null) {
-      controller = CameraController(backCamera!, ResolutionPreset.high, enableAudio: true);
+      controller = CameraController(backCamera!, ResolutionPreset.max, enableAudio: true);
       controller.initialize().then((_) {
         if (!mounted) {
           return;
         }
         setState(() {});
-        startObjectDetection();
+        // startObjectDetection();
       });
     } else {
       print("No back camera found");
@@ -202,22 +207,68 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
   }
 
 
-
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   super.didChangeAppLifecycleState(state);
+  //   if (state == AppLifecycleState.resumed) {
+  //     print("letsseeifitgetsinthelopp");
+  //     // Restart object detection when the widget is in focus
+  //     startObjectDetection();
+  //   }
+  // }
   @override
   void initState() {
+    super.initState();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
     ]);
-    super.initState();
     cameraInit();
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    super.didPopNext();
+    print("didPopNext called");
+    // Restart object detection when the widget is back in focus
+    startObjectDetection();
+  }
+
+  @override
+  void didPush() {
+    super.didPush();
+    print("didPush called");
+    // Start object detection when the widget is pushed to the navigator
+    startObjectDetection();
+  }
+
+  @override
+  void didPushNext() {
+    super.didPushNext();
+    print("didPush next called");
+    // Stop object detection when a new route is pushed on top of this
+    stopObjectDetection();
+  }
+
+  @override
   void dispose() {
+    print("disposeis called");
+    routeObserver.unsubscribe(this);
+    js.context.callMethod('stopAllOperations');
+    // stopObjectDetection();
+    // Unsubscribe before other disposal logic
     controller.dispose();
     _enableRotation();
-    super.dispose();
+    super.dispose();  // Call this last
   }
+
+
+
 
   void _enableRotation() {
     SystemChrome.setPreferredOrientations([
@@ -290,25 +341,27 @@ class _CameraImageUploadState extends State<CameraImageUpload> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                      child: Center(
-                        child: Image.asset(
-                          imagePathList[_currentIndex],
-                          fit: BoxFit.contain,
-                          height: ResHeight(350),
-                          opacity: AlwaysStoppedAnimation(0.5),
-                        ),
-                      )),
+                  // Expanded(
+                  //     child: Center(
+                  //       child: Image.asset(
+                  //         imagePathList[_currentIndex],
+                  //         fit: BoxFit.contain,
+                  //         height: ResHeight(350),
+                  //         opacity: AlwaysStoppedAnimation(0.5),
+                  //       ),
+                  //     )),
                   Padding(
                     padding: EdgeInsets.only(
                         right: ResWidth(10), bottom: ResHeight(64)),
                     child: IconButton(
                         onPressed: () async {
+                          stopObjectDetection();
                           DateTime currentPhoneDate = DateTime.now();
                           var location = await determinePosition();
                           print("okayyyyyyyyyyyyyy");
                           controller.setFlashMode(FlashMode.off);
                           print("doneeeeeeeeeeeee");
+                          print("doneeeeeeeeeeeee2222222");
                           if (!kIsWeb) {
                             try {
                               await controller.setZoomLevel(1);
